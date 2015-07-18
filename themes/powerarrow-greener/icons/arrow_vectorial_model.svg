@@ -15,7 +15,7 @@
    version="1.1"
    inkscape:version="0.48.5 r10040"
    sodipodi:docname="arrow_vectorial_model.svg"
-   inkscape:export-filename="C:\GIT\awesome-copycats\themes\powerarrow-reder\icons\arrow_green.png"
+   inkscape:export-filename="C:\GIT\awesome-copycats\themes\powerarrow-greener\icons\arrl.png"
    inkscape:export-xdpi="9"
    inkscape:export-ydpi="9">
   <defs
@@ -47,8 +47,8 @@
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
      inkscape:zoom="1.979899"
-     inkscape:cx="134.07034"
-     inkscape:cy="98.61371"
+     inkscape:cx="122.44897"
+     inkscape:cy="93.643477"
      inkscape:document-units="px"
      inkscape:current-layer="layer1"
      showgrid="true"
@@ -91,7 +91,7 @@
        y="0"
        transform="translate(0,872.36218)" />
     <path
-       style="fill:none;stroke:#000000;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       style="fill:#71c837;stroke:#710000;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;fill-opacity:1"
        d="M 100,0 5,90 100.0051,180"
        id="path2991"
        inkscape:connector-curvature="0"
