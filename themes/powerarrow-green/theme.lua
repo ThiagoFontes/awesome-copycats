@@ -35,7 +35,12 @@ theme.awful_widget_margin_top       = 2
 theme.mouse_finder_color            = "#CC9393"
 theme.menu_height                   = "16"
 theme.menu_width                    = "140"
+
+theme.arch_icon						= themes_dir .. "/icons/arch20.png"
 theme.awesome_icon					= themes_dir .. "/icons/awesome.png"
+theme.shutdown_icon					= themes_dir .. "/icons/st16.png"
+theme.restart_icon					= themes_dir .. "/icons/res16.png"
+theme.terminal_icon					= themes_dir .. "/icons/ter18.png"
 
 theme.submenu_icon                  = themes_dir .. "/icons/submenu.png"
 theme.taglist_squares_sel           = themes_dir .. "/icons/square_sel.png"
@@ -77,7 +82,7 @@ theme.widget_vol_mute               = themes_dir .. "/icons/vol_mute.png"
 theme.widget_mail                   = themes_dir .. "/icons/mail.png"
 theme.widget_mail_on                = themes_dir .. "/icons/mail_on.png"
 
-theme.tasklist_disable_icon         = true
+theme.tasklist_disable_icon         = false
 theme.tasklist_floating             = ""
 theme.tasklist_maximized_horizontal = ""
 theme.tasklist_maximized_vertical   = ""
