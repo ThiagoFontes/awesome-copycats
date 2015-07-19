@@ -10,6 +10,7 @@ Power themes for Awesome WM 3.5+
 :Version: git
 :License: BY-NC-SA_
 :Source: https://github.com/copycat-killer/awesome-copycats
+:
 
 Description
 ===========
