@@ -15,7 +15,8 @@ local beautiful = require("beautiful")
 local naughty   = require("naughty")
 local drop      = require("scratchdrop")
 local lain      = require("lain")
-local menubar = require("menubar")
+local menubar	= require("menubar")
+local vicious	= require("vicious")
 -- }}}
 
 -- {{{ Error handling
@@ -38,7 +39,7 @@ do
     end)
 end
 -- }}}
-
+--[[
 -- {{{ Autostart applications
 function run_once(cmd)
   findme = cmd
@@ -52,27 +53,29 @@ end
 run_once("urxvtd")
 run_once("unclutter -root")
 -- }}}
-
+--]]
 -- {{{ Variable definitions
 
 -- beautiful init
-beautiful.init(os.getenv("HOME") .. "/.config/awesome/themes/powerarrow-greener/theme.lua")
+beautiful.init(os.getenv("HOME") .. "/.config/awesome/themes/powerarrow-green/theme.lua")
 
+local pomodoro = require("pomodoro")
+pomodoro.init()
 -- common
 modkey     = "Mod4"
 altkey     = "Mod1"
-terminal   = "urxvtc" or "xterm"
-editor     = os.getenv("EDITOR") or "nano" or "vi"
-editor_cmd = terminal .. " -e " .. editor
+terminal   = "terminator"
+editor     = os.getenv("EDITOR") or "gedit" or "nano"
+editor_cmd = terminal .. editor .. " -e " 
 
 -- user defined
-browser    = "dwb"
-browser2   = "iron"
-gui_editor = "gvim"
-graphics   = "gimp"
-mail       = terminal .. " -e mutt "
-iptraf     = terminal .. " -g 180x54-20+34 -e sudo iptraf-ng -i all "
-musicplr   = terminal .. " -g 130x34-320+16 -e ncmpcpp "
+browser    = "firefox"
+--browser2   = "iron"
+--gui_editor = "gvim"
+--graphics   = "gimp"
+--mail       = terminal .. " -e mutt "
+--iptraf     = terminal .. " -g 180x54-20+34 -e sudo iptraf-ng -i all "
+--musicplr   = terminal .. " -g 130x34-320+16 -e ncmpcpp "
 
 local layouts = {
     awful.layout.suit.floating,
@@ -85,8 +88,8 @@ local layouts = {
 
 -- {{{ Tags
 tags = {
-   names = { "A", "R", "C", "H |"},
-   layout = { layouts[4], layouts[3], layouts[2], layouts[1] }
+   names = { "w", "e", "s", "o","m","e"},
+   layout = { layouts[4], layouts[3], layouts[2], layouts[1], layouts[2], layouts[2]}
 }
 
 for s = 1, screen.count() do
@@ -103,12 +106,37 @@ end
 -- }}}
 
 -- {{{ Menu
-mymainmenu = awful.menu.new({ items = require("menugen").build_menu(),
-                              theme = { height = 16, width = 130 }})
+-- Create a laucher widget and a main menu
+myawesomemenu = {
+  -- { "manual", terminal .. " -e man awesome" },
+   --{ "edit config", editor_cmd .. " " .. awesome.conffile },
+   { "reload", awesome.restart },
+   { "quit", awesome.quit }
+}
+
+myldapservermenu = {
+	{"start slapd", "systemctl start slapd.service"},
+	{"restart slapd", "systemctl restart slapd.service"},
+	{"stop slapd", "systemctl stop slapd.service"},
+	{"start nslcd", "systemctl start nslcd.service"},
+	{"restart nslcd", "systemctl restart nslcd.service"},
+	{"stop nslcd", "systemctl stop nslcd.service"},
+}
+
+mymainmenu = awful.menu({ items = { { "awesome", myawesomemenu, beautiful.awesome_icon },
+									{ "OpenLDAP server", myldapservermenu},
+                                    { "open terminal", terminal, beautiful.terminal_icon },
+                                    { "Reboot", "reboot", beautiful.restart_icon},
+                                    { "Shutdown", "shutdown now", beautiful.shutdown_icon}
+                                  }
+                        })
+
+mylauncher = awful.widget.launcher({image = beautiful.arch_icon, menu = mymainmenu })
+
+-- Menubar configuration
+menubar.utils.terminal = terminal -- Set the terminal for applications that require it
 -- }}}
 
-mylauncher = awful.widget.launcher({
-                                     menu = mymainmenu })
 -- {{{ Wibox
 markup = lain.util.markup
 separators = lain.util.separators
@@ -119,7 +147,8 @@ mytextclock = awful.widget.textclock(" %a %d %b  %H:%M")
 
 mytextclock = lain.widgets.abase({
     timeout  = 60,
-    cmd      = "date +'%a %d %b %R'",
+    --cmd      = "date +'%a %d %b %R'",
+    cmd      = "date +'%a %d %b'",
     settings = function() 
         widget:set_text(" " .. output)
     end
@@ -127,6 +156,75 @@ mytextclock = lain.widgets.abase({
 
 -- calendar
 lain.widgets.calendar:attach(mytextclock, { font_size = 10 })
+ ------------------------------------------------------
+ -- Binary clock
+ 
+ local binClock = wibox.widget.base.make_widget()
+ binClock.radius = 1.5
+ binClock.shift = 1.8
+ binClock.farShift = 2
+ binClock.border = 1
+ binClock.lineWidth = 1
+ binClock.colorActive = beautiful.bg_focus 
+ 
+ binClock.fit = function(binClock, width, height)
+ 	local size = math.min(width, height)
+ 	return 6 * 2 * binClock.radius + 5 * binClock.shift + 2 * binClock.farShift + 2 * binClock.border + 2 * binClock.border, size
+ end
+ 
+ binClock.draw = function(binClock, wibox, cr, width, height)
+ 	local curTime = os.date("*t")
+ 
+ 	local column = {}
+ 	table.insert(column, string.format("%04d", binClock:dec_bin(string.sub(string.format("%02d", curTime.hour), 1, 1))))
+ 	table.insert(column, string.format("%04d", binClock:dec_bin(string.sub(string.format("%02d", curTime.hour), 2, 2))))
+ 	table.insert(column, string.format("%04d", binClock:dec_bin(string.sub(string.format("%02d", curTime.min), 1, 1))))
+ 	table.insert(column, string.format("%04d", binClock:dec_bin(string.sub(string.format("%02d", curTime.min), 2, 2))))
+ 	table.insert(column, string.format("%04d", binClock:dec_bin(string.sub(string.format("%02d", curTime.sec), 1, 1))))
+ 	table.insert(column, string.format("%04d", binClock:dec_bin(string.sub(string.format("%02d", curTime.sec), 2, 2))))
+ 
+ 	local bigColumn = 0
+ 	for i = 0, 5 do
+ 		if math.floor(i / 2) > bigColumn then
+ 			bigColumn = bigColumn + 1
+ 		end
+ 		for j = 0, 3 do
+ 			if string.sub(column[i + 1], j + 1, j + 1) == "0" then 
+ 				active = false 
+ 			else 
+ 				active = true 
+ 			end 
+ 			binClock:draw_point(cr, bigColumn, i, j, active)
+ 		end
+ 	end
+ end
+ 
+ binClock.dec_bin = function(binClock, inNum)
+ 	inNum = tonumber(inNum)
+ 	local base, enum, outNum, rem = 2, "01", "", 0
+ 	while inNum > (base - 1) do
+ 		inNum, rem = math.floor(inNum / base), math.fmod(inNum, base)
+ 		outNum = string.sub(enum, rem + 1, rem + 1) .. outNum
+ 	end
+ 	outNum = inNum .. outNum
+ 	return outNum
+ end
+ 
+ binClock.draw_point = function(binClock, cr, bigColumn, column, row, active)
+ 	cr:arc(binClock.border + column * (2 * binClock.radius + binClock.shift) + bigColumn * binClock.farShift + binClock.radius,
+ 		 binClock.border + row * (2 * binClock.radius + binClock.shift) + binClock.radius, 2, 0, 2 * math.pi)
+ 	if active then
+ 		cr:set_source_rgba(0, 0.5, 0, 1)
+ 	else
+ 		cr:set_source_rgba(0.5, 0.5, 0.5, 1)
+ 	end
+ 	cr:fill()
+ end
+ 
+ binClocktimer = timer { timeout = 1 }
+ binClocktimer:connect_signal("timeout", function() binClock:emit_signal("widget::updated") end)
+ binClocktimer:start()
+
 
 -- Mail IMAP check
 mailicon = wibox.widget.imagebox(beautiful.widget_mail)
@@ -213,7 +311,7 @@ batwidget = lain.widgets.bat({
             return
         elseif tonumber(bat_now.perc) <= 5 then
             baticon:set_image(beautiful.widget_battery_empty)
-        elseif tonumber(bat_now.perc) <= 15 then
+        elseif tonumber(bat_now.perc) <= 25 then
             baticon:set_image(beautiful.widget_battery_low)
         else
             baticon:set_image(beautiful.widget_battery)
@@ -250,6 +348,7 @@ netwidget = lain.widgets.net({
                           markup("#46A8C3", " " .. net_now.sent .. " "))
     end
 })
+
 
 -- Separators
 spr = wibox.widget.textbox(' ')
@@ -326,12 +425,13 @@ for s = 1, screen.count() do
     mytasklist[s] = awful.widget.tasklist(s, awful.widget.tasklist.filter.currenttags, mytasklist.buttons)
 
     -- Create the wibox
-    mywibox[s] = awful.wibox({ position = "top", screen = s, height = 18 })
+    mywibox[s] = awful.wibox({ position = "top", screen = s, height = 20 })
 
     -- Widgets that are aligned to the upper left
     local left_layout = wibox.layout.fixed.horizontal()
-    left_layout:add(spr)
+   -- left_layout:add(spr)
     left_layout:add(mylauncher)
+   	left_layout:add(spr)
     left_layout:add(mytaglist[s])
     left_layout:add(mypromptbox[s])
     left_layout:add(spr)
@@ -358,6 +458,8 @@ for s = 1, screen.count() do
     if s == 1 then right_layout:add(wibox.widget.systray()) end
     right_layout:add(spr)
     right_layout:add(arrl)
+    right_layout:add(pomodoro.icon_widget)
+    right_layout:add(pomodoro.widget)
     --right_layout_add(mpdicon, mpdwidget)
     right_layout_add(volicon, volumewidget)
     --right_layout_add(mailicon, mailwidget)
@@ -368,6 +470,7 @@ for s = 1, screen.count() do
     right_layout_add(baticon, batwidget)
     right_layout_add(neticon,netwidget)
     right_layout_add(mytextclock, spr)
+    right_layout_add(binClock)
     right_layout_add(mylayoutbox[s])
 
     -- Now bring it all together (with the tasklist in the middle)
@@ -475,7 +578,10 @@ globalkeys = awful.util.table.join(
     awful.key({ modkey,           }, "Return", function () awful.util.spawn(terminal) end),
     awful.key({ modkey, "Control" }, "r",      awesome.restart),
     awful.key({ modkey, "Shift"   }, "q",      awesome.quit),
-
+	
+	 -- Menubar
+    awful.key({ modkey }, "p", function() menubar.show() end),
+	
     -- Dropdown terminal
     awful.key({ modkey,	          }, "z",      function () drop(terminal) end),
 
@@ -688,6 +794,10 @@ client.connect_signal("manage", function (c, startup)
                     awful.mouse.client.resize(c)
                 end)
                 )
+         -- Widgets that are aligned to the left
+        local left_layout = wibox.layout.fixed.horizontal()
+        left_layout:add(awful.titlebar.widget.iconwidget(c))
+        left_layout:buttons(buttons)
 
         -- widgets that are aligned to the right
         local right_layout = wibox.layout.fixed.horizontal()
@@ -709,7 +819,7 @@ client.connect_signal("manage", function (c, startup)
         layout:set_right(right_layout)
         layout:set_middle(middle_layout)
 
-        awful.titlebar(c,{size=16}):set_widget(layout)
+        awful.titlebar(c,{size=18}):set_widget(layout)
     end
 end)
 

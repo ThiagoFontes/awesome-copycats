@@ -1,10 +1,7 @@
 --[[
                                              
      Powerarrow Darker Awesome WM config 2.0 
-     github.com/copycat-killer
-     
-     Theme modified by Thiago Fontes
-     githum.com/ThiagoFontes               
+     github.com/copycat-killer               
                                              
 --]]
 
@@ -68,7 +65,7 @@ pomodoro.init()
 modkey     = "Mod4"
 altkey     = "Mod1"
 terminal   = "terminator"
-editor     = os.getenv("EDITOR") or "nano"
+editor     = os.getenv("EDITOR") or "gedit" or "nano"
 editor_cmd = terminal .. editor .. " -e " 
 
 -- user defined
